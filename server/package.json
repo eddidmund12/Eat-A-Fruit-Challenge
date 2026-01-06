@@ -21,6 +21,7 @@
     "canvas": "^3.2.0",
     "chownr": "^1.1.4",
     "cloudinary": "^2.8.0",
+    "cors": "^2.8.5",
     "decompress-response": "^6.0.0",
     "deep-extend": "^0.6.0",
     "detect-libc": "^2.1.2",

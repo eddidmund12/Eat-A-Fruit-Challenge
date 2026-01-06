@@ -1,6 +1,5 @@
-// server/routes/admin.js
-const express = require("express");
-const User = require("../models/User");
+import express from "express";
+import User from "../models/User.js";
 
 const router = express.Router();
 
@@ -16,4 +15,4 @@ router.get("/users/:id", async (req, res) => {
   res.json(user);
 });
 
-module.exports = router;
+export default router;

@@ -1,7 +1,11 @@
 // utils/generateFlyer.js
-const { createCanvas, loadImage } = require("canvas");
-const cloudinary = require("../config/cloudinary");
-const path = require("path");
+import { createCanvas, loadImage } from "canvas";
+import cloudinary from "../config/cloudinary.js";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const WIDTH = 1024;
 const HEIGHT = 1536;
@@ -14,7 +18,7 @@ const IMAGE_Y = 640;
 // NAME POSITION
 const NAME_Y = 915;
 
-module.exports = async function generateFlyer(name, imageUrl) {
+export default async function generateFlyer(name, imageUrl) {
   const canvas = createCanvas(WIDTH, HEIGHT);
   const ctx = canvas.getContext("2d");
 
@@ -48,7 +52,6 @@ module.exports = async function generateFlyer(name, imageUrl) {
   ctx.fillStyle = "#2E7D32";
   ctx.font = "600 48px Poppins";
   ctx.textAlign = "center";
-
   ctx.fillText(name, 512, NAME_Y);
 
   // Export flyer
@@ -60,4 +63,4 @@ module.exports = async function generateFlyer(name, imageUrl) {
   );
 
   return upload.secure_url;
-};
+}

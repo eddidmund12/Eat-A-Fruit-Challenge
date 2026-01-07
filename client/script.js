@@ -1,54 +1,60 @@
-const imageInput = document.getElementById("image");
-const preview = document.getElementById("preview");
 const form = document.getElementById("flyerForm");
+const nameInput = document.getElementById("name");
+const imageInput = document.getElementById("image");
+const previewImg = document.getElementById("preview");
 const resultDiv = document.getElementById("result");
 const flyerResult = document.getElementById("flyerResult");
 const downloadBtn = document.getElementById("downloadBtn");
 
+// Show preview of uploaded image
 imageInput.addEventListener("change", () => {
     const file = imageInput.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = () => {
-        preview.src = reader.result;
-        preview.hidden = false;
-    };
-    reader.readAsDataURL(file);
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            previewImg.src = e.target.result;
+            previewImg.hidden = false;
+        };
+        reader.readAsDataURL(file);
+    } else {
+        previewImg.hidden = true;
+    }
 });
 
+// Submit form
 form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const name = document.getElementById("name").value;
-    const image = imageInput.files[0];
-
-    if (!name || !image) {
-        alert("Please enter your name and upload a photo.");
-        return;
-    }
-
     const formData = new FormData();
-    formData.append("name", name);
-    formData.append("image", image);
+    formData.append("name", nameInput.value);
+    formData.append("image", imageInput.files[0]);
 
     try {
-        const res = await fetch("https://eat-a-fruit-challenge.onrender.com/api/register", {
+        const response = await fetch("/api/register", {
             method: "POST",
-            body: formData,
+            body: formData, // Do NOT set Content-Type manually
         });
 
-        const data = await res.json();
+        const data = await response.json();
+        console.log("Server response:", data);
 
         if (data.success) {
-            flyerResult.src = data.flyerUrl;
-            downloadBtn.href = data.flyerUrl;
+            // Show result section
             resultDiv.hidden = false;
+            flyerResult.src = data.flyerUrl;
+
+            // Set download link
+            downloadBtn.href = data.flyerUrl;
+            downloadBtn.download = `${nameInput.value}-flyer.png`;
+
+            // Optionally, reset the form
+            // form.reset();
+            // previewImg.hidden = true;
         } else {
-            alert("Failed to generate flyer. Please try again.");
+            alert("Error: " + data.message);
         }
-    } catch (error) {
-        console.error("Error:", error);
-        alert("An error occurred. Please try again.");
+    } catch (err) {
+        console.error("Fetch error:", err);
+        alert("Something went wrong!");
     }
 });

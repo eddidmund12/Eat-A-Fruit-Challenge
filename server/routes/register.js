@@ -12,6 +12,10 @@ router.post("/", upload.single("image"), async (req, res) => {
     const { name } = req.body;
     const imageBuffer = req.file.buffer;
 
+    if (!name || !imageBuffer) {
+      return res.status(400).json({ success: false, message: "Name and image are required." });
+    }
+
     // Upload to Cloudinary
     const uploadRes = await cloudinary.uploader.upload(
       `data:image/png;base64,${imageBuffer.toString("base64")}`,
@@ -30,8 +34,8 @@ router.post("/", upload.single("image"), async (req, res) => {
 
     res.json({ success: true, flyerUrl });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false });
+    console.error("Error in register route:", err);
+    res.status(500).json({ success: false, message: err.message });
   }
 });
 

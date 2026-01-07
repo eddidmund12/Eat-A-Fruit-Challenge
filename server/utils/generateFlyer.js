@@ -47,8 +47,8 @@ export default async function generateFlyer(name, imageUrl) {
   template = await template
     .composite([{
       input: maskedUserImage,
-      top: IMAGE_Y - IMAGE_DIAMETER / 2,
-      left: IMAGE_X - IMAGE_DIAMETER / 2
+      top: Math.round(IMAGE_Y - IMAGE_DIAMETER / 2),
+      left: Math.round(IMAGE_X - IMAGE_DIAMETER / 2)
     }]);
 
   // Generate text image
@@ -70,8 +70,8 @@ export default async function generateFlyer(name, imageUrl) {
   const finalImage = await template
     .composite([{
       input: textImageBuffer,
-      top: NAME_Y - textHeight,
-      left: 512 - textWidth / 2
+      top: Math.round(NAME_Y - textHeight),
+      left: Math.round(512 - textWidth / 2)
     }])
     .png()
     .toBuffer();

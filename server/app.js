@@ -22,18 +22,18 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/register", registerRoute);
 app.use("/api/admin", adminRoute);
 
-// ===== Serve Frontend =====
+// ===== Serve Frontend from client folder =====
 
-// Get __dirname (required for ES modules)
+// Get __dirname (needed for ES modules)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Serve static files from the "client" folder
-app.use(express.static(path.join(__dirname, "client")));
+// Serve static files from client folder (one level up from server/)
+app.use(express.static(path.join(__dirname, "../client")));
 
-// Fallback route for any unmatched route (useful for SPA)
+// Fallback route for SPA
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "client", "index.html"));
+  res.sendFile(path.join(__dirname, "../client/index.html"));
 });
 
 // Start server

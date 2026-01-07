@@ -9,7 +9,7 @@ import registerRoute from "./routes/register.js";
 import adminRoute from "./routes/admin.js";
 
 // Connect to MongoDB
-await connectDB();
+// await connectDB(); // Commented out for testing
 
 // Initialize Express
 const app = express();

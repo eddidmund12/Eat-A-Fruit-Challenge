@@ -1,8 +1,10 @@
 // utils/generateFlyer.js
-import { createCanvas, loadImage } from "canvas";
+import sharp from "sharp";
+import text2png from "text2png";
 import cloudinary from "../config/cloudinary.js";
 import path from "path";
 import { fileURLToPath } from "url";
+import fetch from "node-fetch"; // Assuming fetch is available or add to deps
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,46 +21,64 @@ const IMAGE_Y = 640;
 const NAME_Y = 915;
 
 export default async function generateFlyer(name, imageUrl) {
-  const canvas = createCanvas(WIDTH, HEIGHT);
-  const ctx = canvas.getContext("2d");
-
   // Load template
-  const template = await loadImage(
-    path.join(__dirname, "../assets/template.png")
-  );
-  ctx.drawImage(template, 0, 0, WIDTH, HEIGHT);
+  const templatePath = path.join(__dirname, "../assets/template.png");
+  let template = sharp(templatePath);
 
-  // Load user image
-  const userImage = await loadImage(imageUrl);
+  // Fetch user image
+  const userImageResponse = await fetch(imageUrl);
+  const userImageBuffer = await userImageResponse.buffer();
 
-  // Clip circle
-  ctx.save();
-  ctx.beginPath();
-  ctx.arc(IMAGE_X, IMAGE_Y, IMAGE_DIAMETER / 2, 0, Math.PI * 2);
-  ctx.closePath();
-  ctx.clip();
+  // Create circular mask for user image
+  const mask = Buffer.from(`
+    <svg width="${IMAGE_DIAMETER}" height="${IMAGE_DIAMETER}">
+      <circle cx="${IMAGE_DIAMETER / 2}" cy="${IMAGE_DIAMETER / 2}" r="${IMAGE_DIAMETER / 2}" fill="white"/>
+    </svg>
+  `);
 
-  // Draw image
-  ctx.drawImage(
-    userImage,
-    IMAGE_X - IMAGE_DIAMETER / 2,
-    IMAGE_Y - IMAGE_DIAMETER / 2,
-    IMAGE_DIAMETER,
-    IMAGE_DIAMETER
-  );
-  ctx.restore();
+  // Resize and mask user image
+  const maskedUserImage = await sharp(userImageBuffer)
+    .resize(IMAGE_DIAMETER, IMAGE_DIAMETER, { fit: 'cover' })
+    .composite([{ input: mask, blend: 'dest-in' }])
+    .png()
+    .toBuffer();
 
-  // Draw name
-  ctx.fillStyle = "#2E7D32";
-  ctx.font = "600 48px Poppins";
-  ctx.textAlign = "center";
-  ctx.fillText(name, 512, NAME_Y);
+  // Composite masked user image onto template
+  template = await template
+    .composite([{
+      input: maskedUserImage,
+      top: IMAGE_Y - IMAGE_DIAMETER / 2,
+      left: IMAGE_X - IMAGE_DIAMETER / 2
+    }]);
 
-  // Export flyer
-  const buffer = canvas.toBuffer("image/png");
+  // Generate text image
+  const textImageBuffer = text2png(name, {
+    font: '600 48px Poppins',
+    color: '#2E7D32',
+    backgroundColor: 'transparent',
+    textAlign: 'center',
+    lineSpacing: 0,
+    padding: 0
+  });
 
+  // Get exact text dimensions
+  const textMetadata = await sharp(textImageBuffer).metadata();
+  const textWidth = textMetadata.width;
+  const textHeight = textMetadata.height;
+
+  // Composite text onto template (baseline at NAME_Y)
+  const finalImage = await template
+    .composite([{
+      input: textImageBuffer,
+      top: NAME_Y - textHeight,
+      left: 512 - textWidth / 2
+    }])
+    .png()
+    .toBuffer();
+
+  // Upload to Cloudinary
   const upload = await cloudinary.uploader.upload(
-    `data:image/png;base64,${buffer.toString("base64")}`,
+    `data:image/png;base64,${finalImage.toString("base64")}`,
     { folder: "eat-a-fruit/flyers" }
   );
 

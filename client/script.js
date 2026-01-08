@@ -2,26 +2,149 @@ const form = document.getElementById("flyerForm");
 const nameInput = document.getElementById("name");
 const imageInput = document.getElementById("image");
 const previewImg = document.getElementById("preview");
-const resultDiv = document.getElementById("result");
-const flyerResult = document.getElementById("flyerResult");
-const downloadBtn = document.getElementById("downloadBtn");
 
-// Show preview of uploaded image
+/* ---------------------------
+   CREATE OVERLAYS
+----------------------------*/
+
+// Processing overlay
+const processingOverlay = document.createElement("div");
+processingOverlay.className = "overlay hidden";
+processingOverlay.innerHTML = `
+  <div class="processing-box">
+    <div class="spinner"></div>
+    <p id="processingText">Generating flyer...</p>
+  </div>
+`;
+document.body.appendChild(processingOverlay);
+
+// Result popup
+const resultOverlay = document.createElement("div");
+resultOverlay.className = "overlay hidden";
+resultOverlay.innerHTML = `
+  <div class="result-box">
+    <button class="close-btn">&times;</button>
+
+    <img id="popupFlyer" />
+
+    <button id="popupDownload">Download Flyer</button>
+
+    <div class="share-section">
+      <p>Share your flyer</p>
+      <div class="share-buttons">
+        <button id="shareWhatsapp">WhatsApp</button>
+        <button id="shareFacebook">Facebook</button>
+        <button id="shareTwitter">Twitter / X</button>
+      </div>
+    </div>
+  </div>
+`;
+document.body.appendChild(resultOverlay);
+
+/* ---------------------------
+   STYLES
+----------------------------*/
+const style = document.createElement("style");
+style.textContent = `
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.hidden {
+  display: none;
+}
+
+.processing-box,
+.result-box {
+  background: white;
+  padding: 30px;
+  border-radius: 14px;
+  text-align: center;
+  max-width: 90%;
+  position: relative;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #ddd;
+  border-top-color: #2E7D32;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 15px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.result-box img {
+  max-width: 100%;
+  border-radius: 10px;
+  margin-bottom: 15px;
+}
+
+.close-btn {
+  position: absolute;
+  top: 15px;
+  right: 18px;
+  font-size: 28px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.share-section {
+  margin-top: 20px;
+}
+
+.share-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.share-buttons button,
+#popupDownload {
+  padding: 10px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  background: #2E7D32;
+  color: white;
+}
+`;
+document.head.appendChild(style);
+
+/* ---------------------------
+   IMAGE PREVIEW
+----------------------------*/
 imageInput.addEventListener("change", () => {
   const file = imageInput.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      previewImg.src = e.target.result;
-      previewImg.hidden = false;
-    };
-    reader.readAsDataURL(file);
-  } else {
+  if (!file) {
     previewImg.hidden = true;
+    return;
   }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    previewImg.src = e.target.result;
+    previewImg.hidden = false;
+  };
+  reader.readAsDataURL(file);
 });
 
-// Submit form
+/* ---------------------------
+   FORM SUBMIT
+----------------------------*/
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -29,57 +152,82 @@ form.addEventListener("submit", async (e) => {
   formData.append("name", nameInput.value);
   formData.append("image", imageInput.files[0]);
 
+  processingOverlay.classList.remove("hidden");
+  document.getElementById("processingText").textContent = "Generating flyer...";
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30000);
+
   try {
     const response = await fetch("/api/register", {
       method: "POST",
       body: formData,
+      signal: controller.signal,
     });
 
+    clearTimeout(timeout);
+
     const data = await response.json();
-    console.log("Server response:", data);
+    if (!data.success) throw new Error(data.message);
 
-    if (data.success) {
-      resultDiv.hidden = false;
-      flyerResult.src = data.flyerUrl;
+    processingOverlay.classList.add("hidden");
 
-      // Enable download button
-      downloadBtn.disabled = false;
-      downloadBtn.textContent = "Download Flyer";
+    const popupFlyer = document.getElementById("popupFlyer");
+    const popupDownload = document.getElementById("popupDownload");
 
-      // ✅ Force download from Cloudinary + loader
-      downloadBtn.onclick = async () => {
-        const originalText = downloadBtn.textContent;
+    popupFlyer.src = data.flyerUrl;
+    resultOverlay.classList.remove("hidden");
 
-        try {
-          downloadBtn.disabled = true;
-          downloadBtn.textContent = "Downloading...";
+    /* -------- DOWNLOAD -------- */
+    popupDownload.onclick = async () => {
+      popupDownload.textContent = "Downloading...";
+      popupDownload.disabled = true;
 
-          const response = await fetch(flyerResult.src);
-          const blob = await response.blob();
+      const res = await fetch(data.flyerUrl);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
 
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement("a");
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${nameInput.value}-flyer.png`;
+      a.click();
 
-          a.href = url;
-          a.download = `${nameInput.value}-flyer.png`;
-          document.body.appendChild(a);
-          a.click();
+      URL.revokeObjectURL(url);
+      popupDownload.textContent = "Download Flyer";
+      popupDownload.disabled = false;
+    };
 
-          a.remove();
-          window.URL.revokeObjectURL(url);
-        } catch (err) {
-          console.error("Download failed:", err);
-          alert("Failed to download flyer.");
-        } finally {
-          downloadBtn.disabled = false;
-          downloadBtn.textContent = originalText;
-        }
-      };
-    } else {
-      alert("Error: " + data.message);
-    }
+    /* -------- SHARING -------- */
+    const shareUrl = encodeURIComponent(data.flyerUrl);
+    const shareText = encodeURIComponent("Check out my flyer!");
+
+    document.getElementById("shareWhatsapp").onclick = () => {
+      window.open(`https://wa.me/?text=${shareText}%20${shareUrl}`, "_blank");
+    };
+
+    document.getElementById("shareFacebook").onclick = () => {
+      window.open(
+        `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`,
+        "_blank"
+      );
+    };
+
+    document.getElementById("shareTwitter").onclick = () => {
+      window.open(
+        `https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`,
+        "_blank"
+      );
+    };
   } catch (err) {
-    console.error("Fetch error:", err);
-    alert("Something went wrong!");
+    document.getElementById("processingText").textContent =
+      "Network error! Retry.";
+    console.error(err);
   }
 });
+
+/* ---------------------------
+   CLOSE RESULT POPUP
+----------------------------*/
+resultOverlay.querySelector(".close-btn").onclick = () => {
+  resultOverlay.classList.add("hidden");
+};

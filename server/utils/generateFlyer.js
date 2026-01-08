@@ -9,36 +9,48 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const WIDTH = 1024;
-const HEIGHT = 1536;
 
-const IMAGE_DIAMETER = 430;
-const IMAGE_X = 512;
-const IMAGE_Y = 640;
+const FRAME_DIAMETER = 430;   // exact circle size on template
+const OVERSIZE = 480;         // resize slightly larger to avoid gaps
+
+const IMAGE_X = 512;          // center X of circle
+const IMAGE_Y = 640;          // center Y of circle
 const NAME_Y = 875;
 
 export default async function generateFlyer(name, imageUrl) {
   const templatePath = path.join(__dirname, "../assets/template.png");
 
   // Fetch user image
-  const response = await fetch(imageUrl);
-  const userImageBuffer = Buffer.from(await response.arrayBuffer());
+  const res = await fetch(imageUrl);
+  const userImageBuffer = Buffer.from(await res.arrayBuffer());
 
-  // Create circular mask
-  const circleMask = Buffer.from(`
-    <svg width="${IMAGE_DIAMETER}" height="${IMAGE_DIAMETER}">
-      <circle cx="${IMAGE_DIAMETER / 2}" cy="${IMAGE_DIAMETER / 2}" r="${IMAGE_DIAMETER / 2}" fill="white"/>
+  // Circle mask (SVG)
+  const mask = Buffer.from(`
+    <svg width="${FRAME_DIAMETER}" height="${FRAME_DIAMETER}">
+      <circle
+        cx="${FRAME_DIAMETER / 2}"
+        cy="${FRAME_DIAMETER / 2}"
+        r="${FRAME_DIAMETER / 2}"
+        fill="white"
+      />
     </svg>
   `);
 
-  // Crop image into a transparent circle
-  const croppedUserImage = await sharp(userImageBuffer)
-    .resize(IMAGE_DIAMETER, IMAGE_DIAMETER, { fit: "cover" })
-    .composite([{ input: circleMask, blend: "dest-in" }])
+  // Resize → crop → mask (perfect circular image)
+  const userCircle = await sharp(userImageBuffer)
+    .resize(OVERSIZE, OVERSIZE, { fit: "cover", position: "centre" })
+    .extract({
+      left: Math.floor((OVERSIZE - FRAME_DIAMETER) / 2),
+      top: Math.floor((OVERSIZE - FRAME_DIAMETER) / 2),
+      width: FRAME_DIAMETER,
+      height: FRAME_DIAMETER,
+    })
+    .composite([{ input: mask, blend: "dest-in" }])
     .png()
     .toBuffer();
 
-  // Render name text
-  const textImageBuffer = text2png(name, {
+  // Name text
+  const textBuffer = text2png(name, {
     font: "600 48px Poppins",
     color: "#2E7D32",
     backgroundColor: "transparent",
@@ -46,26 +58,44 @@ export default async function generateFlyer(name, imageUrl) {
     padding: 10,
   });
 
-  const textMetadata = await sharp(textImageBuffer).metadata();
+  const textMeta = await sharp(textBuffer).metadata();
+  const templateMeta = await sharp(templatePath).metadata();
 
-  // Composite everything onto template
-  const finalImage = await sharp(templatePath)
+  // Final composite (user image → template → text)
+  const finalImage = await sharp({
+    create: {
+      width: templateMeta.width,
+      height: templateMeta.height,
+      channels: 4,
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    },
+  })
     .composite([
+      // User image BEHIND
       {
-        input: croppedUserImage,
-        top: Math.round(IMAGE_Y - IMAGE_DIAMETER / 2),
-        left: Math.round(IMAGE_X - IMAGE_DIAMETER / 2),
+        input: userCircle,
+        top: Math.round(IMAGE_Y - FRAME_DIAMETER / 2),
+        left: Math.round(IMAGE_X - FRAME_DIAMETER / 2),
       },
+
+      // Template ON TOP (transparent image window)
       {
-        input: textImageBuffer,
-        top: Math.round(NAME_Y),
-        left: Math.round(WIDTH / 2 - textMetadata.width / 2),
+        input: templatePath,
+        top: 0,
+        left: 0,
+      },
+
+      // Name text ON TOP
+      {
+        input: textBuffer,
+        top: NAME_Y,
+        left: Math.round(WIDTH / 2 - textMeta.width / 2),
       },
     ])
     .png()
     .toBuffer();
 
-  // Upload final flyer
+  // Upload to Cloudinary
   const upload = await cloudinary.uploader.upload(
     `data:image/png;base64,${finalImage.toString("base64")}`,
     { folder: "eat-a-fruit/flyers" }

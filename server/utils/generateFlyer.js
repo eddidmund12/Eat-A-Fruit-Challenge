@@ -11,11 +11,10 @@ const __dirname = path.dirname(__filename);
 const WIDTH = 1024;
 
 const FRAME_DIAMETER = 430;   // exact circle size on template
-const OVERSIZE = 480;         // resize slightly larger to avoid gaps
 
 const IMAGE_X = 512;          // center X of circle
-const IMAGE_Y = 690;          // ✅ corrected center Y of circle
-const NAME_Y = IMAGE_Y + FRAME_DIAMETER / 2 + 40; // ✅ always below frame
+const IMAGE_Y = 690;          // center Y of circle
+const NAME_Y = IMAGE_Y + FRAME_DIAMETER / 2 + 40;
 
 export default async function generateFlyer(name, imageUrl) {
   const templatePath = path.join(__dirname, "../assets/template.png");
@@ -36,14 +35,11 @@ export default async function generateFlyer(name, imageUrl) {
     </svg>
   `);
 
-  // Resize → crop → mask
+  // ✅ Resize image EXACTLY to frame size → mask
   const userCircle = await sharp(userImageBuffer)
-    .resize(OVERSIZE, OVERSIZE, { fit: "cover", position: "centre" })
-    .extract({
-      left: Math.floor((OVERSIZE - FRAME_DIAMETER) / 2),
-      top: Math.floor((OVERSIZE - FRAME_DIAMETER) / 2),
-      width: FRAME_DIAMETER,
-      height: FRAME_DIAMETER,
+    .resize(FRAME_DIAMETER, FRAME_DIAMETER, {
+      fit: "cover",
+      position: "centre",
     })
     .composite([{ input: mask, blend: "dest-in" }])
     .png()

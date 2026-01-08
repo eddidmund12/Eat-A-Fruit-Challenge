@@ -29,24 +29,23 @@ export default async function generateFlyer(name, imageUrl) {
   const userImageResponse = await fetch(imageUrl);
   const userImageBuffer = await userImageResponse.buffer();
 
-  // Create circular mask for user image
-  const mask = Buffer.from(`
-    <svg width="${IMAGE_DIAMETER}" height="${IMAGE_DIAMETER}">
-      <circle cx="${IMAGE_DIAMETER / 2}" cy="${IMAGE_DIAMETER / 2}" r="${IMAGE_DIAMETER / 2}" fill="white"/>
-    </svg>
-  `);
+  // // Create circular mask for user image
+  // const mask = Buffer.from(`
+  //   <svg width="${IMAGE_DIAMETER}" height="${IMAGE_DIAMETER}">
+  //     <circle cx="${IMAGE_DIAMETER / 2}" cy="${IMAGE_DIAMETER / 2}" r="${IMAGE_DIAMETER / 2}" fill="white"/>
+  //   </svg>
+  // `);
 
   // Resize and mask user image
-  const maskedUserImage = await sharp(userImageBuffer)
-    .resize(IMAGE_DIAMETER, IMAGE_DIAMETER, { fit: 'cover' })
-    .composite([{ input: mask, blend: 'dest-in' }])
-    .png()
-    .toBuffer();
+  const userImage = await sharp(userImageBuffer)
+  .resize(IMAGE_DIAMETER, IMAGE_DIAMETER, { fit: 'cover' })
+  .png()
+  .toBuffer();
 
   // Composite masked user image onto template
   template = await template
     .composite([{
-      input: maskedUserImage,
+      input: userImage,
       top: Math.round(IMAGE_Y - IMAGE_DIAMETER / 2),
       left: Math.round(IMAGE_X - IMAGE_DIAMETER / 2)
     }]);

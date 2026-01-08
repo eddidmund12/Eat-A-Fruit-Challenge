@@ -14,6 +14,7 @@ processingOverlay.innerHTML = `
   <div class="processing-box">
     <div class="spinner"></div>
     <p id="processingText">Generating flyer...</p>
+    <button id="retryBtn" class="hidden">Retry</button>
   </div>
 `;
 document.body.appendChild(processingOverlay);
@@ -24,19 +25,8 @@ resultOverlay.className = "overlay hidden";
 resultOverlay.innerHTML = `
   <div class="result-box">
     <button class="close-btn">&times;</button>
-
     <img id="popupFlyer" />
-
     <button id="popupDownload">Download Flyer</button>
-
-    <div class="share-section">
-      <p>Share your flyer</p>
-      <div class="share-buttons">
-        <button id="shareWhatsapp">WhatsApp</button>
-        <button id="shareFacebook">Facebook</button>
-        <button id="shareTwitter">Twitter / X</button>
-      </div>
-    </div>
   </div>
 `;
 document.body.appendChild(resultOverlay);
@@ -55,6 +45,7 @@ style.textContent = `
   align-items: center;
   justify-content: center;
   z-index: 9999;
+  overflow-y: auto; /* ✅ allow scroll */
 }
 
 .hidden {
@@ -68,6 +59,8 @@ style.textContent = `
   border-radius: 14px;
   text-align: center;
   max-width: 90%;
+  max-height: 90vh;
+  overflow-y: auto; /* ✅ popup scroll */
   position: relative;
 }
 
@@ -91,35 +84,26 @@ style.textContent = `
   margin-bottom: 15px;
 }
 
-.close-btn {
-  position: absolute;
-  top: 15px;
-  right: 18px;
-  font-size: 28px;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-.share-section {
-  margin-top: 20px;
-}
-
-.share-buttons {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.share-buttons button,
-#popupDownload {
+button {
   padding: 10px 16px;
   border-radius: 6px;
   border: none;
   cursor: pointer;
   background: #2E7D32;
   color: white;
+}
+
+.close-btn {
+  position: absolute;
+  top: 15px;
+  right: 18px;
+  font-size: 28px;
+  background: none;
+  color: #000;
+}
+
+#retryBtn {
+  margin-top: 15px;
 }
 `;
 document.head.appendChild(style);
@@ -154,6 +138,7 @@ form.addEventListener("submit", async (e) => {
 
   processingOverlay.classList.remove("hidden");
   document.getElementById("processingText").textContent = "Generating flyer...";
+  document.getElementById("retryBtn").classList.add("hidden");
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 30000);
@@ -196,32 +181,21 @@ form.addEventListener("submit", async (e) => {
       popupDownload.textContent = "Download Flyer";
       popupDownload.disabled = false;
     };
-
-    /* -------- SHARING -------- */
-    const shareUrl = encodeURIComponent(data.flyerUrl);
-    const shareText = encodeURIComponent("Check out my flyer!");
-
-    document.getElementById("shareWhatsapp").onclick = () => {
-      window.open(`https://wa.me/?text=${shareText}%20${shareUrl}`, "_blank");
-    };
-
-    document.getElementById("shareFacebook").onclick = () => {
-      window.open(
-        `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`,
-        "_blank"
-      );
-    };
-
-    document.getElementById("shareTwitter").onclick = () => {
-      window.open(
-        `https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`,
-        "_blank"
-      );
-    };
   } catch (err) {
-    document.getElementById("processingText").textContent =
-      "Network error! Retry.";
     console.error(err);
+
+    document.getElementById("processingText").textContent =
+      "Network error! Please try again.";
+    const retryBtn = document.getElementById("retryBtn");
+    retryBtn.classList.remove("hidden");
+
+    retryBtn.onclick = () => {
+      processingOverlay.classList.add("hidden");
+
+      // ✅ clear image only, keep name
+      imageInput.value = "";
+      previewImg.hidden = true;
+    };
   }
 });
 

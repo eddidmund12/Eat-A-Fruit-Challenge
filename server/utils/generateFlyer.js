@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 
 const WIDTH = 1024;
 
-const FRAME_DIAMETER = 490;   // exact circle size on template
+const FRAME_DIAMETER = 600;   // exact circle size on template
 
 const IMAGE_X = 512;          // center X of circle
 const IMAGE_Y = 690;          // center Y of circle

@@ -14,8 +14,8 @@ const FRAME_DIAMETER = 430;   // exact circle size on template
 const OVERSIZE = 480;         // resize slightly larger to avoid gaps
 
 const IMAGE_X = 512;          // center X of circle
-const IMAGE_Y = 640;          // center Y of circle
-const NAME_Y = 875;
+const IMAGE_Y = 690;          // ✅ corrected center Y of circle
+const NAME_Y = IMAGE_Y + FRAME_DIAMETER / 2 + 40; // ✅ always below frame
 
 export default async function generateFlyer(name, imageUrl) {
   const templatePath = path.join(__dirname, "../assets/template.png");
@@ -24,7 +24,7 @@ export default async function generateFlyer(name, imageUrl) {
   const res = await fetch(imageUrl);
   const userImageBuffer = Buffer.from(await res.arrayBuffer());
 
-  // Circle mask (SVG)
+  // Circular SVG mask
   const mask = Buffer.from(`
     <svg width="${FRAME_DIAMETER}" height="${FRAME_DIAMETER}">
       <circle
@@ -36,7 +36,7 @@ export default async function generateFlyer(name, imageUrl) {
     </svg>
   `);
 
-  // Resize → crop → mask (perfect circular image)
+  // Resize → crop → mask
   const userCircle = await sharp(userImageBuffer)
     .resize(OVERSIZE, OVERSIZE, { fit: "cover", position: "centre" })
     .extract({
@@ -61,7 +61,7 @@ export default async function generateFlyer(name, imageUrl) {
   const textMeta = await sharp(textBuffer).metadata();
   const templateMeta = await sharp(templatePath).metadata();
 
-  // Final composite (user image → template → text)
+  // Final composite: image → template → text
   const finalImage = await sharp({
     create: {
       width: templateMeta.width,
@@ -71,24 +71,19 @@ export default async function generateFlyer(name, imageUrl) {
     },
   })
     .composite([
-      // User image BEHIND
       {
         input: userCircle,
         top: Math.round(IMAGE_Y - FRAME_DIAMETER / 2),
         left: Math.round(IMAGE_X - FRAME_DIAMETER / 2),
       },
-
-      // Template ON TOP (transparent image window)
       {
         input: templatePath,
         top: 0,
         left: 0,
       },
-
-      // Name text ON TOP
       {
         input: textBuffer,
-        top: NAME_Y,
+        top: Math.round(NAME_Y),
         left: Math.round(WIDTH / 2 - textMeta.width / 2),
       },
     ])

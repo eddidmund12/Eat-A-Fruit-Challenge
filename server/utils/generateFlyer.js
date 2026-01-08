@@ -13,7 +13,7 @@ const WIDTH = 1024;
 const FRAME_DIAMETER = 600;   // exact circle size on template
 
 const IMAGE_X = 500;          // center X of circle
-const IMAGE_Y = 710;          // center Y of circle
+const IMAGE_Y = 720;          // center Y of circle
 const NAME_Y = IMAGE_Y + FRAME_DIAMETER / 2 + 40;
 
 export default async function generateFlyer(name, imageUrl) {

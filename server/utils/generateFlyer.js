@@ -17,8 +17,8 @@ const IMAGE_DIAMETER = 430;
 const IMAGE_X = 512;
 const IMAGE_Y = 640;
 
-// NAME POSITION
-const NAME_Y = 915;
+// NAME POSITION (adjusted to be just below the image frame)
+const NAME_Y = 875;
 
 export default async function generateFlyer(name, imageUrl) {
   // Load template

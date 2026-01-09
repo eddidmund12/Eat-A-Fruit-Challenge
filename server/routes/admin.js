@@ -3,6 +3,16 @@ import User from "../models/User.js";
 
 const router = express.Router();
 
+// Validate passcode
+router.post("/validate-passcode", (req, res) => {
+  const { passcode } = req.body;
+  if (passcode === "@10dayschallenge") {
+    res.json({ valid: true });
+  } else {
+    res.json({ valid: false });
+  }
+});
+
 // Get all users
 router.get("/users", async (req, res) => {
   const users = await User.find().sort({ createdAt: -1 });

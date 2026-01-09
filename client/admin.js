@@ -7,7 +7,6 @@ const logoutBtn = document.getElementById("logoutBtn");
 const tbody = document.querySelector("tbody");
 const modal = document.getElementById("modal");
 const toggle = document.getElementById("toggle")
-const PASSCODE = "@10dayschallenge";
 function checkLogin() {
   if (localStorage.getItem("adminLoggedIn") === "true") {
     showAdmin();
@@ -56,12 +55,26 @@ function showUser(id) {
 }
 
 loginBtn.onclick = () => {
-  if (passcodeInput.value === PASSCODE) {
-    localStorage.setItem("adminLoggedIn", "true");
-    showAdmin();
-  } else {
+  fetch("/api/admin/validate-passcode", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ passcode: passcodeInput.value })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.valid) {
+      localStorage.setItem("adminLoggedIn", "true");
+      showAdmin();
+    } else {
+      error.style.display = "block";
+    }
+  })
+  .catch(err => {
+    console.error("Error validating passcode:", err);
     error.style.display = "block";
-  }
+  });
 };
 
 logoutBtn.onclick = () => {

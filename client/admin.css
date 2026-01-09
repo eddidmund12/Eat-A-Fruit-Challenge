@@ -95,7 +95,7 @@ tr:hover {
   text-align: center;
 }
 #userTable{
-  height: 80vh;
+  max-height: 80vh;
   overflow-y: scroll;
 }
 .btn{

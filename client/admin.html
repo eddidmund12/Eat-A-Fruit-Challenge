@@ -6,22 +6,32 @@
 </head>
 <body>
 
-<h2>Participants</h2>
+<div id="loginForm">
+  <h2>Admin Login</h2>
+  <input type="password" id="passcode" placeholder="Enter passcode">
+  <button id="loginBtn">Login</button>
+  <p id="error" style="color: red; display: none;">Incorrect passcode</p>
+</div>
 
-<table id="userTable">
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Date</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
+<div id="adminContent" style="display: none;">
+  <h2>Participants</h2>
 
-<button id="clearBtn">Clear All Participants</button>
+  <table id="userTable">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
-<div id="modal" hidden>
-  <img id="flyerImg" />
+  <button id="clearBtn">Clear All Participants</button>
+  <button id="logoutBtn">Logout</button>
+
+  <div id="modal" hidden>
+    <img id="flyerImg" />
+  </div>
 </div>
 
 <script src="admin.js"></script>

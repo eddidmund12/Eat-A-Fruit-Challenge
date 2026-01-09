@@ -11,7 +11,7 @@ body {
   align-items: center;
 }
 .second-body{
-    height: 100vh;
+    height: auto;
     display: none;
 }
 table {

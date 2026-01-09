@@ -94,8 +94,8 @@ tr:hover {
 .participants{
   text-align: center;
 }
-#userTable{
-  max-height: 80vh;
+.table-body{
+  max-height: 70vh;
   overflow-y: scroll;
 }
 .btn{

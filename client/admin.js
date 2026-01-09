@@ -1,7 +1,7 @@
 const tbody = document.querySelector("tbody");
 const modal = document.getElementById("modal");
 
-fetch("http://localhost:5000/api/admin/users")
+fetch("/api/admin/users")
   .then(res => res.json())
   .then(users => {
     users.forEach(u => {
@@ -16,7 +16,7 @@ fetch("http://localhost:5000/api/admin/users")
   });
 
 function showUser(id) {
-  fetch(`http://localhost:5000/api/admin/users/${id}`)
+  fetch(`/api/admin/users/${id}`)
     .then(res => res.json())
     .then(user => {
       document.getElementById("profileImg").src = user.profileImage;

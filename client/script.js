@@ -137,7 +137,7 @@ form.addEventListener("submit", async (e) => {
   formData.append("image", imageInput.files[0]);
 
   processingOverlay.classList.remove("hidden");
-  document.getElementById("processingText").textContent = "Generating flyer...";
+  document.getElementById("processingText").textContent = "Generating...";
   document.getElementById("retryBtn").classList.add("hidden");
 
   const controller = new AbortController();
@@ -178,7 +178,7 @@ form.addEventListener("submit", async (e) => {
       a.click();
 
       URL.revokeObjectURL(url);
-      popupDownload.textContent = "Download Flyer";
+      popupDownload.textContent = "Download";
       popupDownload.disabled = false;
     };
   } catch (err) {

@@ -21,11 +21,11 @@ function showUser(id) {
     .then(user => {
       document.getElementById("profileImg").src = user.profileImage;
       document.getElementById("flyerImg").src = user.flyerImage;
-      modal.hidden = false;
+      modal.style.display = "flex";
     });
 }
 
-modal.onclick = () => modal.hidden = true;
+modal.onclick = () => modal.style.display = "none";
 
 document.getElementById("clearBtn").onclick = () => {
   if (confirm("Are you sure you want to clear all participants? This action cannot be undone.")) {

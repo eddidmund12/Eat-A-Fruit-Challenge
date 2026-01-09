@@ -15,4 +15,10 @@ router.get("/users/:id", async (req, res) => {
   res.json(user);
 });
 
+// Delete all users
+router.delete("/users", async (req, res) => {
+  await User.deleteMany({});
+  res.json({ message: "All users deleted" });
+});
+
 export default router;

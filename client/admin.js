@@ -26,3 +26,11 @@ function showUser(id) {
 }
 
 modal.onclick = () => modal.hidden = true;
+
+document.getElementById("clearBtn").onclick = () => {
+  if (confirm("Are you sure you want to clear all participants? This action cannot be undone.")) {
+    fetch("/api/admin/users", { method: "DELETE" })
+      .then(res => res.json())
+      .then(() => location.reload());
+  }
+};

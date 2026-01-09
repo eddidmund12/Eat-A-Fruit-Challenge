@@ -19,10 +19,11 @@ function showUser(id) {
   fetch(`/api/admin/users/${id}`)
     .then(res => res.json())
     .then(user => {
-      document.getElementById("profileImg").src = user.profileImage;
+      console.log("User flyerImage:", user.flyerImage);
       document.getElementById("flyerImg").src = user.flyerImage;
       modal.style.display = "flex";
-    });
+    })
+    .catch(err => console.error("Error fetching user:", err));
 }
 
 modal.onclick = () => modal.style.display = "none";

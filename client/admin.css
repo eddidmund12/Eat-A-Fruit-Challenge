@@ -1,8 +1,19 @@
 body {
   font-family: sans-serif;
   padding: 20px;
+  background:linear-gradient( 180deg,#F7FFF4 0%,#E8F5E9 100%);
+  background-repeat: no-repeat; 
 }
-
+.first-body{
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.second-body{
+    height: 100vh;
+    display: none;
+}
 table {
   width: 100%;
   border-collapse: collapse;
@@ -31,4 +42,84 @@ tr:hover {
 #modal img {
   max-width: 90%;
   margin: 10px;
+}
+.loginform h2{
+  text-align: center;
+  font-size: 3rem;
+  margin-bottom: 30px;
+}
+.log-div{
+  display: flex;
+  flex-direction: column;
+}
+.code{
+  display: inline-flex;
+  gap: 10px;
+}
+.code input{
+  padding: 10px;
+  max-width: 300px;
+  border-radius: 7px;
+  border: 1px solid #2e7d32;
+  font-size: 1.2rem;
+}
+.code input:focus{
+  outline: none;
+}
+.code input::placeholder{
+  font-size: 1rem;
+}
+#loginBtn{
+  width: 200px;
+  font-size: 1.3rem;
+  border: none;
+  background-color: #2e7d32;
+  margin: 40px 0 0 0;
+  border-radius: 10px;
+  padding: 10px;
+  color: #E8F5E9;
+  align-self: center;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+#loginBtn:hover{
+  transform: translateY(-2px);
+  scale: 1.01;
+}
+.code button{
+  font-size: 0.9rem;
+  border: 1px solid #2e7d32;
+  border-radius: 5px;
+}
+.participants{
+  text-align: center;
+}
+#userTable{
+  height: 80vh;
+  overflow-y: scroll;
+}
+.btn{
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+.btn button{
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  box-shadow: 0 5px 10px;
+  background-color: rgb(156, 2, 2);
+  color: #E8F5E9;
+  font-size: larger;
+  cursor: pointer;
+  transition: all 0.5s ease-in-out;
+}
+.btn button:hover{
+  transform: translateY(-3px);
+  background-color: rgb(158, 62, 62);
+}
+@media (max-width: 767px) {
+  .loginform h2{
+    font-size: 3rem;
+  }
 }

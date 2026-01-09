@@ -1,36 +1,50 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard</title>
   <link rel="stylesheet" href="admin.css" />
 </head>
 <body>
 
-<div id="loginForm">
-  <h2>Admin Login</h2>
-  <input type="password" id="passcode" placeholder="Enter passcode">
-  <button id="loginBtn">Login</button>
-  <p id="error" style="color: red; display: none;">Incorrect passcode</p>
+<div class="first-body"  id="loginForm">
+  <div class="loginform">
+    <h2>Admin Login</h2>
+    <div class="log-div">
+      <div class="code">
+        <input type="password" id="passcode" placeholder="Enter passcode">
+        <button id="toggle">Show</button>
+      </div>
+      <button id="loginBtn">Login</button>
+      <p id="error" style="color: red; display: none;">Incorrect passcode</p>
+    </div>
+    
+  </div>
 </div>
 
-<div id="adminContent" style="display: none;">
-  <h2>Participants</h2>
+<div class="second-body" id="adminContent">
+  <div >
+    <h2 class="participants">Participants</h2>
 
-  <table id="userTable">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Date</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+    <table id="userTable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
 
-  <button id="clearBtn">Clear All Participants</button>
-  <button id="logoutBtn">Logout</button>
+    <div class="btn">
+      <button id="clearBtn">Clear All Participants</button>
+      <button id="logoutBtn">Logout</button>
+    </div>
 
-  <div id="modal" hidden>
-    <img id="flyerImg" />
+    <div id="modal" hidden>
+      <img id="flyerImg" />
+    </div>
   </div>
 </div>
 

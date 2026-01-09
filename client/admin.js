@@ -6,9 +6,8 @@ const error = document.getElementById("error");
 const logoutBtn = document.getElementById("logoutBtn");
 const tbody = document.querySelector("tbody");
 const modal = document.getElementById("modal");
-
+const toggle = document.getElementById("toggle")
 const PASSCODE = "@10dayschallenge";
-
 function checkLogin() {
   if (localStorage.getItem("adminLoggedIn") === "true") {
     showAdmin();
@@ -18,7 +17,7 @@ function checkLogin() {
 }
 
 function showLogin() {
-  loginForm.style.display = "block";
+  loginForm.style.display = "flex";
   adminContent.style.display = "none";
 }
 
@@ -81,3 +80,8 @@ document.getElementById("clearBtn").onclick = () => {
 };
 
 checkLogin();
+toggle.addEventListener("click", ()=>{
+  const isHidden = passcodeInput.type === "password";
+  passcodeInput.type = isHidden ? "text" : "password";
+  toggle.textContent = isHidden ? "Hide" : "show";
+})

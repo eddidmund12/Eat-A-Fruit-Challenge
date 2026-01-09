@@ -130,7 +130,13 @@ imageInput.addEventListener("change", () => {
    FORM SUBMIT
 ----------------------------*/
 form.addEventListener("submit", async (e) => {
-  e.preventDefault();
+  if (nameInput.value==="" || imageInput.files.length===0){
+    alert("Please enter both details")
+    return;
+  }
+  
+ else{
+   e.preventDefault();
 
   const formData = new FormData();
   formData.append("name", nameInput.value);
@@ -197,6 +203,7 @@ form.addEventListener("submit", async (e) => {
       previewImg.hidden = true;
     };
   }
+ }
 });
 
 /* ---------------------------
